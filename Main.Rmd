@@ -1,0 +1,121 @@
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+df <- read.csv("AEP_hourly.csv")
+```
+
+```{r}
+names(df)
+```
+
+```{r}
+glimpse(df)
+```
+
+```{r}
+class(df)
+```
+
+```{r}
+sum(is.na(df))
+```
+```{r}
+library(lubridate)
+```
+
+```{r}
+df$Datetime <- as.Date(df$Datetime)
+```
+
+```{r}
+df$Datetime <- as.Date(df$Datetime, format = "%yy/%mm/%dd %hh")
+head(df)
+```
+
+
+```{r}
+dt <- df %>%
+  select(Datetime, AEP_MW) %>%
+  mutate(Month = month(Datetime), Year = year(Datetime), Hour = hour(Datetime))
+```
+
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+ggplot(dt, aes(x = as.Date(Datetime), y = AEP_MW))+
+  geom_line(color="#69b3a2")+
+  scale_x_date(date_labels = "%Y %b %d")
+```
+```{r}
+library(tseries)
+```
+
+
+```{r}
+acf(dt$AEP_MW, plot = T)
+```
+
+```{r}
+pacf(dt$AEP_MW, plot = T)
+```
+
+```{r}
+adf.test(df$AEP_MW)
+```
+```{r}
+library(forecast)
+```
+
+```{r}
+findfrequency(df$AEP_MW)
+```
+
+```{r}
+Temp <- ts(df$AEP_MW, frequency = 24)
+class(Temp)
+```
+
+```{r}
+table <- dt %>%
+  select(Datetime,Year,AEP_MW,Month,Hour) %>%
+  filter(Year == 2014)
+
+ggplot(table, aes(x = Datetime, y = AEP_MW))+
+  geom_line(color = '#F18904')
+```
+
+```{r}
+tstable <- ts(table$AEP_MW, frequency = 24)
+class(tstable)
+```
+
+
+```{r}
+ggtsdisplay(tstable)
+```
+
+```{r}
+fit <- auto.arima(tstable, seasonal = TRUE, test = 'adf', ic = 'aic')
+fit
+```
+
+```{r}
+checkresiduals(fit)
+```
+
+
+# Fitting an ARIMA Model
+```{r}
+
+```
+
+
+
+
